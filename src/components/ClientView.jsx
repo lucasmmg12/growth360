@@ -59,12 +59,13 @@ const ClientView = ({ session, profile, isDemo, onLogout }) => {
     const [competitors, setCompetitors] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    const [showRecordModal, setShowRecordModal] = useState(false);
+    const [modalMode, setModalMode] = useState(null); // 'venta' or 'gasto'
     const [newRecord, setNewRecord] = useState({
         date: new Date().toISOString().split('T')[0],
-        sales: 0,
-        expenses: 0,
-        fixed_costs: 0
+        amount: 0,
+        category: '',
+        isInventory: false,
+        description: ''
     });
 
     useEffect(() => {
@@ -144,12 +145,38 @@ const ClientView = ({ session, profile, isDemo, onLogout }) => {
 
     const handleCreateRecord = async (e) => {
         e.preventDefault();
+        const saleAmount = modalMode === 'venta' ? newRecord.amount : 0;
+        const expenseAmount = modalMode === 'gasto' ? newRecord.amount : 0;
+
         if (isDemo) {
-            setRecords([...records, { ...newRecord, sales: Number(newRecord.sales), expenses: Number(newRecord.expenses), fixed_costs: Number(newRecord.fixed_costs) }]);
-            setShowRecordModal(false); return;
+            setRecords([...records, {
+                record_date: newRecord.date,
+                sales: saleAmount,
+                expenses: expenseAmount,
+                fixed_costs: 0,
+                description: newRecord.description + (newRecord.isInventory ? ' [COMPRA MERCADERÍA]' : '')
+            }]);
+            setModalMode(null);
+            setNewRecord({ date: new Date().toISOString().split('T')[0], amount: 0, category: '', isInventory: false, description: '' });
+            return;
         }
-        const { error } = await supabase.from('daily_records').insert([{ ...newRecord, client_id: session.user.id }]);
-        if (!error) { setShowRecordModal(false); fetchData(); }
+
+        const { error } = await supabase.from('daily_records').insert({
+            client_id: session.user.id,
+            record_date: newRecord.date,
+            sales: saleAmount,
+            expenses: expenseAmount,
+            category: newRecord.category,
+            is_inventory: newRecord.isInventory,
+            description: newRecord.description
+        });
+
+        if (error) alert(error.message);
+        else {
+            setModalMode(null);
+            fetchData();
+            setNewRecord({ date: new Date().toISOString().split('T')[0], amount: 0, category: '', isInventory: false, description: '' });
+        }
     };
 
     const totalSales = records.reduce((acc, curr) => acc + Number(curr.sales), 0);
@@ -187,8 +214,7 @@ const ClientView = ({ session, profile, isDemo, onLogout }) => {
 
     return (
         <div className="flex h-screen bg-transparent text-gray-950 font-montserrat overflow-hidden">
-
-            {/* Sidebar - White to pop against gray bg */}
+            {/* Sidebar */}
             <aside className="w-72 bg-white border-r border-gray-200 flex flex-col p-8 space-y-10 z-20 shadow-xl">
                 <div className="flex items-center gap-3 px-2">
                     <div className="w-9 h-9 bg-gray-900 rounded-lg flex items-center justify-center text-white font-black text-sm">G</div>
@@ -224,9 +250,8 @@ const ClientView = ({ session, profile, isDemo, onLogout }) => {
                 </button>
             </aside>
 
-            {/* Main Corporate Workspace - Gray Background */}
+            {/* Main Corporate Workspace */}
             <main className="flex-grow overflow-y-auto custom-scrollbar bg-transparent">
-
                 <header className="sticky top-0 z-10 bg-white/20 backdrop-blur-xl px-12 py-8 flex justify-between items-center border-b border-gray-200/50">
                     <div>
                         <h1 className="text-2xl font-black text-gray-900 tracking-tight capitalize">
@@ -239,16 +264,25 @@ const ClientView = ({ session, profile, isDemo, onLogout }) => {
                             {businessData?.fantasy_name || 'Grow Labs Partner'} • <span className="text-gray-400 font-black">{new Date().toLocaleDateString('es-AR', { day: '2-digit', month: 'long' })}</span>
                         </p>
                     </div>
-                    <button
-                        onClick={() => setShowRecordModal(true)}
-                        className="button-primary px-10 py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest flex items-center gap-2 shadow-xl shadow-gray-900/10"
-                    >
-                        <Plus size={16} strokeWidth={3} /> Nuevo Registro
-                    </button>
+                    {activeTab === 'registros' && (
+                        <div className="flex gap-4">
+                            <button
+                                onClick={() => { setModalMode('venta'); setNewRecord({ ...newRecord, isInventory: false }); }}
+                                className="bg-white border-2 border-gray-900 text-gray-900 px-10 py-5 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-gray-50 transition-all shadow-xl shadow-gray-900/5 flex items-center gap-3"
+                            >
+                                <TrendingUp size={16} /> + Cargar Venta
+                            </button>
+                            <button
+                                onClick={() => setModalMode('gasto')}
+                                className="button-primary px-10 py-5 rounded-2xl font-black text-xs uppercase tracking-widest flex items-center gap-3 shadow-2xl shadow-gray-900/20"
+                            >
+                                <TrendingDown size={16} /> + Cargar Egreso
+                            </button>
+                        </div>
+                    )}
                 </header>
 
                 <div className="p-12 space-y-12">
-
                     {activeTab === 'resumen' && (
                         <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -268,7 +302,6 @@ const ClientView = ({ session, profile, isDemo, onLogout }) => {
                                     <p className="text-[8px] text-gray-400 font-bold uppercase tracking-widest mt-4">Resultado neto después de deducir todos los costos operativos.</p>
                                 </div>
                             </div>
-
                             <div className="bg-white p-12 rounded-[3.5rem] border border-gray-200 shadow-md">
                                 <h3 className="text-sm font-black uppercase tracking-[0.3em] text-gray-900 mb-4 border-l-4 border-gray-900 pl-6 italic">Visualización Histórica de Flujo</h3>
                                 <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest ml-10 mb-10 italic">Gráfico evolutivo de ingresos diarios para identificar picos de demanda.</p>
@@ -302,7 +335,6 @@ const ClientView = ({ session, profile, isDemo, onLogout }) => {
                                         ))}
                                     </div>
                                 </div>
-
                                 <div className="lg:col-span-2 space-y-8 flex flex-col">
                                     <div className="bg-white p-12 rounded-[3.5rem] border border-gray-200 shadow-md flex-grow">
                                         <div className="flex justify-between items-center mb-4">
@@ -327,7 +359,6 @@ const ClientView = ({ session, profile, isDemo, onLogout }) => {
                                             ))}
                                         </div>
                                     </div>
-
                                     <div className="bg-gray-900 p-10 rounded-[3.5rem] text-white shadow-2xl shadow-gray-900/20">
                                         <div className="flex items-center gap-4 mb-6">
                                             <div className="p-2 bg-white/10 rounded-xl"><Zap size={20} className="text-white" /></div>
@@ -340,7 +371,6 @@ const ClientView = ({ session, profile, isDemo, onLogout }) => {
                                     </div>
                                 </div>
                             </div>
-
                             <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
                                 <div className="lg:col-span-1 space-y-8 max-h-[750px] overflow-y-auto custom-scrollbar pr-6">
                                     <h3 className="text-xs font-black uppercase tracking-[0.3em] text-gray-500 mb-6 flex items-center gap-3 italic">
@@ -357,7 +387,6 @@ const ClientView = ({ session, profile, isDemo, onLogout }) => {
                                                     {c.active_ads ? 'Ads Activos' : 'Inactivo'}
                                                 </div>
                                             </div>
-
                                             <div className="space-y-4 mb-8">
                                                 <div className="p-5 bg-gray-50 rounded-2xl border border-gray-100">
                                                     <span className="text-[9px] font-black text-gray-600 uppercase block mb-3 underline decoration-gray-200 underline-offset-4">Core Strengths</span>
@@ -372,15 +401,12 @@ const ClientView = ({ session, profile, isDemo, onLogout }) => {
                                                     </p>
                                                 </div>
                                             </div>
-
                                             <button className="w-full py-5 bg-gray-50 border border-gray-100 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] hover:bg-gray-900 hover:text-white transition-all duration-300 shadow-sm flex items-center justify-center gap-3 group">
                                                 Ver anuncios <ExternalLink size={14} className="group-hover:translate-x-1 transition-transform" />
                                             </button>
-                                            <p className="text-[8px] text-gray-400 font-bold uppercase tracking-widest mt-4 text-center opacity-70">Enlace externo a la biblioteca de anuncios de Meta.</p>
                                         </div>
                                     ))}
                                 </div>
-
                                 <div className="lg:col-span-2 bg-white rounded-[4rem] border border-gray-200 shadow-lg relative overflow-hidden h-[750px]">
                                     <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_2px,transparent_2px)] [background-size:32px:32px] opacity-60"></div>
                                     <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-24 z-10 bg-white/60 backdrop-blur-[2px]">
@@ -391,13 +417,7 @@ const ClientView = ({ session, profile, isDemo, onLogout }) => {
                                         <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.3em] mb-12 border-b border-gray-100 pb-2">Geolocalización avanzada de competidores.</p>
                                         <p className="text-gray-400 text-sm max-w-sm mb-12 font-medium leading-relaxed uppercase tracking-[0.3em]">Auditoría geo-estratégica de sucursales y radios de solapamiento comercial.</p>
                                         <button onClick={handleScrape} className="button-primary px-16 py-6 rounded-3xl font-black uppercase text-[11px] tracking-[0.4em] shadow-2xl">Refrescar Mapa de Inteligencia</button>
-                                        <p className="text-[9px] text-gray-400 font-bold uppercase tracking-[0.2em] mt-8 flex items-center gap-2">
-                                            <HelpCircle size={12} /> Actualiza los datos de ubicación a través de Google Maps API.
-                                        </p>
                                     </div>
-
-                                    <div className="absolute right-[10%] top-[15%] w-96 h-96 border-8 border-gray-900/5 rounded-full scale-110"></div>
-                                    <div className="absolute left-[5%] bottom-[10%] w-[500px] h-[500px] border-4 border-gray-900/5 rounded-full"></div>
                                 </div>
                             </div>
                         </div>
@@ -427,7 +447,7 @@ const ClientView = ({ session, profile, isDemo, onLogout }) => {
                                 </thead>
                                 <tbody className="divide-y divide-gray-50">
                                     {records.map((r, i) => {
-                                        const bal = r.sales - r.expenses - r.fixed_costs;
+                                        const bal = Number(r.sales) - Number(r.expenses) - Number(r.fixed_costs);
                                         return (
                                             <tr key={i} className="hover:bg-gray-50/40 transition-colors duration-200">
                                                 <td className="px-12 py-8 font-black text-xs uppercase tracking-tighter text-gray-500">{r.record_date}</td>
@@ -442,9 +462,6 @@ const ClientView = ({ session, profile, isDemo, onLogout }) => {
                                     })}
                                 </tbody>
                             </table>
-                            <div className="bg-gray-50/50 p-6 border-t border-gray-100 text-center">
-                                <p className="text-[9px] text-gray-300 font-bold uppercase tracking-[0.2em] italic">Utilice el filtrado superior para buscar registros específicos de cierres previos.</p>
-                            </div>
                         </div>
                     )}
 
@@ -453,9 +470,7 @@ const ClientView = ({ session, profile, isDemo, onLogout }) => {
                             <div className="bg-white p-12 lg:p-16 rounded-[4.5rem] border border-gray-200 shadow-lg space-y-16">
                                 <div className="space-y-12">
                                     <h3 className="text-xs font-black text-gray-500 tracking-[0.6em] uppercase border-b border-gray-50 pb-8 w-full italic font-light">Estructura Institucional & Identidad</h3>
-
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                                        {/* Nombre y Apellido */}
                                         <div className="space-y-4">
                                             <label className="text-[10px] font-black text-gray-900 uppercase tracking-[0.2em] ml-2">Nombre y Apellido</label>
                                             <input type="text" className="w-full bg-gray-100 border border-gray-200 rounded-[1.5rem] py-6 px-8 text-sm font-black focus:bg-white focus:ring-2 focus:ring-gray-900/5 transition-all outline-none shadow-sm"
@@ -463,40 +478,25 @@ const ClientView = ({ session, profile, isDemo, onLogout }) => {
                                                 onChange={(e) => setBusinessData({ ...businessData, full_name: e.target.value })}
                                                 placeholder="Ej: Juan Pérez"
                                             />
-                                            <p className="text-[8px] text-gray-400 font-bold uppercase tracking-widest flex items-center gap-2 ml-4">
-                                                <Info size={10} /> Titular o responsable legal de la cuenta.
-                                            </p>
                                         </div>
-
-                                        {/* Nombre Fantasía */}
                                         <div className="space-y-4">
-                                            <label className="text-[10px] font-black text-gray-900 uppercase tracking-[0.2em] ml-2">Nombre Fantasía del Negocio</label>
+                                            <label className="text-[10px] font-black text-gray-900 uppercase tracking-[0.2em] ml-2">Nombre Fantasía</label>
                                             <input type="text" className="w-full bg-gray-100 border border-gray-200 rounded-[1.5rem] py-6 px-8 text-sm font-black focus:bg-white focus:ring-2 focus:ring-gray-900/5 transition-all outline-none shadow-sm"
                                                 value={businessData?.fantasy_name || ''}
                                                 onChange={(e) => setBusinessData({ ...businessData, fantasy_name: e.target.value })}
                                                 placeholder="Ej: Vyper Suplementos"
                                             />
-                                            <p className="text-[8px] text-gray-400 font-bold uppercase tracking-widest flex items-center gap-2 ml-4">
-                                                <Info size={10} /> Marca comercial utilizada frente al público.
-                                            </p>
                                         </div>
                                     </div>
-
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                                        {/* Instagram */}
                                         <div className="space-y-4">
-                                            <label className="text-[10px] font-black text-gray-900 uppercase tracking-[0.2em] ml-2">Perfil de Instagram (URL)</label>
+                                            <label className="text-[10px] font-black text-gray-900 uppercase tracking-[0.2em] ml-2">Instagram (URL)</label>
                                             <input type="text" className="w-full bg-gray-100 border border-gray-200 rounded-[1.5rem] py-6 px-8 text-sm font-black focus:bg-white focus:ring-2 focus:ring-gray-900/5 transition-all outline-none shadow-sm"
                                                 value={businessData?.instagram_url || ''}
                                                 onChange={(e) => setBusinessData({ ...businessData, instagram_url: e.target.value })}
                                                 placeholder="https://instagram.com/tu.negocio"
                                             />
-                                            <p className="text-[8px] text-gray-400 font-bold uppercase tracking-widest flex items-center gap-2 ml-4">
-                                                <Info size={10} /> Enlace directo para auditorías de redes sociales.
-                                            </p>
                                         </div>
-
-                                        {/* Rubro Dropdown */}
                                         <div className="space-y-4">
                                             <label className="text-[10px] font-black text-gray-900 uppercase tracking-[0.2em] ml-2">Rubro / Sector</label>
                                             <select
@@ -513,38 +513,18 @@ const ClientView = ({ session, profile, isDemo, onLogout }) => {
                                                 <option value="Servicios Profesionales">Servicios Profesionales</option>
                                                 <option value="Otros">Otros</option>
                                             </select>
-                                            <p className="text-[8px] text-gray-400 font-bold uppercase tracking-widest flex items-center gap-2 ml-4">
-                                                <Info size={10} /> Categorización comercial para benchmarks de competencia.
-                                            </p>
                                         </div>
                                     </div>
-
-                                    {/* Google Maps con Búsqueda */}
                                     <div className="space-y-4">
-                                        <div className="flex justify-between items-center px-2">
-                                            <label className="text-[10px] font-black text-gray-900 uppercase tracking-[0.2em]">Ubicación en Google Maps</label>
-                                            <a
-                                                href={`https://www.google.com/maps/search/${encodeURIComponent(businessData?.fantasy_name || 'Negocios cercanos')}`}
-                                                target="_blank"
-                                                rel="noreferrer"
-                                                className="text-[9px] font-black text-gray-400 hover:text-gray-900 flex items-center gap-2 uppercase tracking-widest transition-colors"
-                                            >
-                                                <MapIcon size={12} /> Buscar en Google Maps
-                                            </a>
-                                        </div>
+                                        <label className="text-[10px] font-black text-gray-900 uppercase tracking-[0.2em] ml-2">Ubicación Google Maps</label>
                                         <input type="text" className="w-full bg-gray-100 border border-gray-200 rounded-[1.5rem] py-6 px-8 text-sm font-black focus:bg-white focus:ring-2 focus:ring-gray-900/5 transition-all outline-none shadow-sm"
                                             value={businessData?.google_maps_url || ''}
                                             onChange={(e) => setBusinessData({ ...businessData, google_maps_url: e.target.value })}
-                                            placeholder="Pegue aquí el enlace compartido de Google Maps"
+                                            placeholder="Enlace de Google Maps"
                                         />
-                                        <p className="text-[8px] text-gray-400 font-bold uppercase tracking-widest flex items-center gap-2 ml-4">
-                                            <HelpCircle size={10} /> Copie el enlace desde Google Maps para habilitar los reportes de cobertura local.
-                                        </p>
                                     </div>
-
-                                    {/* Tipificación (Existing) */}
                                     <div className="space-y-4">
-                                        <label className="text-[10px] font-black text-gray-900 uppercase tracking-[0.2em] ml-2">Tipificación de Cliente Core</label>
+                                        <label className="text-[10px] font-black text-gray-900 uppercase tracking-[0.2em] ml-2">Tipificación Cliente</label>
                                         <select
                                             className="w-full bg-gray-100 border border-gray-200 rounded-[1.5rem] py-6 px-10 text-sm font-black focus:bg-white focus:ring-2 focus:ring-gray-900/5 transition-all outline-none appearance-none shadow-sm"
                                             value={businessData?.client_type || 'minorista'}
@@ -554,9 +534,6 @@ const ClientView = ({ session, profile, isDemo, onLogout }) => {
                                             <option value="mayorista">Enfoque Mayorista / B2B</option>
                                             <option value="ambos">Modelo Híbrido Corporativo</option>
                                         </select>
-                                        <p className="text-[8px] text-gray-400 font-bold uppercase tracking-widest flex items-center gap-2 ml-4">
-                                            <HelpCircle size={10} /> Define cómo el sistema prioriza ciertos análisis de mercado.
-                                        </p>
                                     </div>
                                 </div>
                                 <button onClick={handleSaveProfile} className="button-primary w-full py-7 rounded-[2rem] font-black uppercase text-xs tracking-[0.5em] shadow-2xl shadow-gray-900/20">Aplicar Transformación</button>
@@ -567,45 +544,95 @@ const ClientView = ({ session, profile, isDemo, onLogout }) => {
             </main>
 
             {/* Record Modal */}
-            {showRecordModal && (
+            {modalMode && (
                 <div className="fixed inset-0 bg-gray-900/60 backdrop-blur-2xl flex items-center justify-center z-50 p-6 animate-in fade-in duration-300">
                     <div className="bg-white w-full max-w-2xl p-20 rounded-[5rem] shadow-[0_50px_100px_-20px_rgba(0,0,0,0.15)] border border-gray-50 scale-100 animate-in zoom-in-95 duration-500">
-                        <h3 className="text-4xl font-black text-gray-900 tracking-tighter mb-4 uppercase italic border-l-[12px] border-gray-900 pl-10">Entrada Contable</h3>
-                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest ml-10 mb-12 italic border-b border-gray-50 pb-2">Registro de cierre operativo diario.</p>
-                        <form onSubmit={handleCreateRecord} className="space-y-12">
+                        <div className="flex items-center gap-6 mb-8 uppercase italic">
+                            <h3 className="text-4xl font-black text-gray-900 tracking-tighter border-l-[12px] border-gray-900 pl-10">
+                                {modalMode === 'venta' ? 'Carga de Venta' : 'Carga de Egreso'}
+                            </h3>
+                        </div>
+
+                        <p className="text-[10px] text-gray-700 font-black uppercase tracking-[0.2em] ml-10 mb-2 italic">
+                            {modalMode === 'venta' ? 'Sincronización de Ingresos' : 'Control de Salidas de Capital'}
+                        </p>
+                        <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest ml-10 mb-12 border-b border-gray-100 pb-8 max-w-md leading-relaxed">
+                            {modalMode === 'venta'
+                                ? 'Registre los ingresos totales brutos del periodo seleccionado para el cálculo de facturación proyectada.'
+                                : 'Registre cualquier salida de dinero. Recuerde categorizar correctamente para no distorsionar los costos operativos.'}
+                        </p>
+
+                        <form onSubmit={handleCreateRecord} className="space-y-10">
                             <div className="space-y-4">
-                                <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest ml-4">Periodo de Ejecución</label>
+                                <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest ml-4">Fecha de Operación</label>
                                 <input type="date" value={newRecord.date} onChange={(e) => setNewRecord({ ...newRecord, date: e.target.value })}
-                                    className="w-full bg-gray-50 border-none rounded-[2rem] p-6 focus:bg-white focus:ring-2 focus:ring-gray-900/5 outline-none font-black text-gray-900 text-lg shadow-inner"
+                                    className="w-full bg-gray-100 border border-gray-200 rounded-[2rem] p-6 focus:bg-white focus:ring-2 focus:ring-gray-900/5 outline-none font-black text-gray-900 text-lg shadow-sm"
                                 />
-                                <p className="text-[8px] text-gray-400 font-bold uppercase tracking-widest ml-6">Fecha a la que se imputará este movimiento.</p>
                             </div>
-                            <div className="grid grid-cols-2 gap-10">
-                                <div className="space-y-4">
-                                    <label className="text-[10px] font-black text-gray-900 uppercase tracking-widest ml-4">Ventas Reales ($)</label>
-                                    <input type="number" value={newRecord.sales} onChange={(e) => setNewRecord({ ...newRecord, sales: e.target.value })}
-                                        className="w-full bg-gray-50 border-none rounded-[2.5rem] p-8 focus:bg-white focus:shadow-3xl transition-all outline-none font-black text-gray-900 text-3xl placeholder-gray-100 shadow-inner" placeholder="0"
-                                    />
-                                    <p className="text-[8px] text-gray-400 font-bold uppercase tracking-widest ml-6">Ingresos totales brutos sin deducciones.</p>
-                                </div>
-                                <div className="space-y-4">
-                                    <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest ml-4">Gastos Directos ($)</label>
-                                    <input type="number" value={newRecord.expenses} onChange={(e) => setNewRecord({ ...newRecord, expenses: e.target.value })}
-                                        className="w-full bg-gray-50 border-none rounded-[2.5rem] p-8 focus:bg-white focus:shadow-3xl transition-all outline-none font-black text-gray-600 text-3xl placeholder-gray-100 shadow-inner" placeholder="0"
-                                    />
-                                    <p className="text-[8px] text-gray-400 font-bold uppercase tracking-widest ml-6">Egresos variables directos de la operación.</p>
-                                </div>
-                            </div>
+
                             <div className="space-y-4">
-                                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Costos Estructura / Fijos ($)</label>
-                                <input type="number" value={newRecord.fixed_costs} onChange={(e) => setNewRecord({ ...newRecord, fixed_costs: e.target.value })}
-                                    className="w-full bg-gray-50 border-none rounded-[2.5rem] p-8 focus:bg-white focus:shadow-3xl transition-all outline-none font-black text-gray-300 text-2xl placeholder-gray-100 shadow-inner" placeholder="0"
+                                <label className="text-[10px] font-black text-gray-900 uppercase tracking-widest ml-4">
+                                    {modalMode === 'venta' ? 'Monto Total ($)' : 'Monto del Egreso ($)'}
+                                </label>
+                                <input type="number" value={newRecord.amount} onChange={(e) => setNewRecord({ ...newRecord, amount: e.target.value })}
+                                    className="w-full bg-gray-100 border border-gray-200 rounded-[2.5rem] p-8 focus:bg-white focus:shadow-3xl transition-all outline-none font-black text-gray-900 text-4xl placeholder-gray-200 shadow-sm" placeholder="0"
                                 />
-                                <p className="text-[8px] text-gray-400 font-bold uppercase tracking-widest ml-6">Costos constantes (alquiler, luz, sueldos fijos).</p>
                             </div>
-                            <div className="flex gap-8 pt-12">
-                                <button type="button" onClick={() => setShowRecordModal(false)} className="flex-1 py-7 rounded-[2rem] bg-gray-50 text-[11px] font-bold uppercase tracking-[0.3em] text-gray-500 hover:bg-gray-100 transition-all font-black">Anular</button>
-                                <button type="submit" className="flex-[2] button-primary py-7 rounded-[2rem] font-black uppercase text-[11px] tracking-[0.4em] shadow-2xl">Confirmar Carga</button>
+
+                            {modalMode === 'gasto' && (
+                                <div className="space-y-8">
+                                    <div className="space-y-4">
+                                        <label className="text-[10px] font-black text-gray-600 uppercase tracking-widest ml-4">Categoría del Gasto</label>
+                                        <select
+                                            className="w-full bg-gray-100 border border-gray-200 rounded-[2rem] p-6 outline-none font-black text-gray-900 text-sm shadow-sm"
+                                            value={newRecord.category}
+                                            onChange={(e) => setNewRecord({ ...newRecord, category: e.target.value })}
+                                        >
+                                            <option value="">Seleccione categoría</option>
+                                            <option value="publicidad">Márketing & Ads</option>
+                                            <option value="logistica">Logística & Envíos</option>
+                                            <option value="insumos">Insumos de Oficina</option>
+                                            <option value="merceria">Mercadería (Stock)</option>
+                                            <option value="mantenimiento">Mantenimiento</option>
+                                            <option value="otros">Otros Gastos Operativos</option>
+                                        </select>
+                                    </div>
+
+                                    <div className="bg-gray-50/50 p-8 rounded-[2.5rem] border border-gray-100">
+                                        <label className="flex items-center gap-6 cursor-pointer group">
+                                            <div className="relative">
+                                                <input
+                                                    type="checkbox"
+                                                    className="peer hidden"
+                                                    checked={newRecord.isInventory}
+                                                    onChange={(e) => setNewRecord({ ...newRecord, isInventory: e.target.checked })}
+                                                />
+                                                <div className="w-8 h-8 bg-white border-2 border-gray-200 rounded-lg peer-checked:bg-gray-900 peer-checked:border-gray-900 transition-all flex items-center justify-center">
+                                                    <div className="w-2 h-2 bg-white rounded-full opacity-0 peer-checked:opacity-100"></div>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <span className="block text-[11px] font-black text-gray-900 uppercase tracking-widest">¿Es Compra de Mercadería?</span>
+                                                <span className="block text-[9px] text-gray-400 font-bold uppercase tracking-tighter mt-1 italic">
+                                                    Las compras de stock NO contabilizan como costo fijo/operativo.
+                                                </span>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                            )}
+
+                            <div className="space-y-4">
+                                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Descripción / Nota</label>
+                                <input type="text" value={newRecord.description} onChange={(e) => setNewRecord({ ...newRecord, description: e.target.value })}
+                                    className="w-full bg-gray-100 border border-gray-200 rounded-[2rem] p-6 focus:bg-white outline-none font-bold text-gray-600 text-sm shadow-sm"
+                                    placeholder="Ej: Publicidad Facebook Ads, etc."
+                                />
+                            </div>
+
+                            <div className="flex gap-8 pt-8">
+                                <button type="button" onClick={() => setModalMode(null)} className="flex-1 py-7 rounded-[2rem] bg-gray-50 text-[11px] font-bold uppercase tracking-[0.3em] text-gray-500 hover:bg-gray-100 transition-all font-black">Anular</button>
+                                <button type="submit" className="flex-[2] button-primary py-7 rounded-[2rem] font-black uppercase text-[11px] tracking-[0.4em] shadow-2xl">Confirmar Registro</button>
                             </div>
                         </form>
                     </div>

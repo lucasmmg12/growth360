@@ -12,7 +12,10 @@ CREATE TABLE IF NOT EXISTS public.profiles (
 CREATE TABLE IF NOT EXISTS public.business_data (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   client_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
+  full_name TEXT,
   fantasy_name TEXT,
+  google_maps_url TEXT,
+  instagram_url TEXT,
   location_lat DOUBLE PRECISION,
   location_lng DOUBLE PRECISION,
   rubro TEXT,
@@ -28,6 +31,8 @@ CREATE TABLE IF NOT EXISTS public.daily_records (
   sales DECIMAL DEFAULT 0,
   expenses DECIMAL DEFAULT 0,
   fixed_costs DECIMAL DEFAULT 0,
+  category TEXT,
+  is_inventory BOOLEAN DEFAULT FALSE,
   description TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );

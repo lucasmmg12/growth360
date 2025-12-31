@@ -53,12 +53,12 @@ const Login = ({ startDemo }) => {
     };
 
     return (
-        <div className="min-h-screen bg-transparent flex flex-col font-montserrat text-gray-900 overflow-hidden relative">
+        <div className="min-h-screen bg-transparent flex flex-col font-montserrat text-gray-900 overflow-y-auto overflow-x-hidden relative">
 
             {/* Structural background elements */}
             <div className="absolute top-0 right-0 w-[60%] h-full bg-white skew-x-[-12deg] translate-x-[20%] z-0 border-l border-gray-200 shadow-[0_0_80px_rgba(0,0,0,0.02)]"></div>
 
-            <div className="flex-grow flex items-center justify-center p-8 lg:p-20 z-10">
+            <div className="flex-grow flex items-center justify-center p-8 lg:p-20 z-10 w-full">
                 <div className="w-full max-w-[1400px] grid grid-cols-1 lg:grid-cols-2 gap-20 xl:gap-32 items-center">
 
                     {/* Left: Brand Context */}
@@ -184,7 +184,9 @@ const Login = ({ startDemo }) => {
                 </div>
             </div>
 
-            <Footer />
+            <div className="z-10">
+                <Footer />
+            </div>
         </div>
     );
 };
