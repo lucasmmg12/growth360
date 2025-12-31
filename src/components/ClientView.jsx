@@ -453,44 +453,79 @@ const ClientView = ({ session, profile, isDemo, onLogout }) => {
                     )}
 
                     {activeTab === 'registros' && (
-                        <div className="bg-white rounded-[3.5rem] border border-gray-200 shadow-md overflow-hidden animate-in fade-in duration-500">
-                            <div className="px-12 py-10 border-b border-gray-100 flex justify-between items-center bg-gray-50/10">
+                        <div className="bg-white rounded-[2.5rem] lg:rounded-[3.5rem] border border-gray-200 shadow-md overflow-hidden animate-in fade-in duration-500">
+                            <div className="px-6 py-6 lg:px-12 lg:py-10 border-b border-gray-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 bg-gray-50/10">
                                 <div>
-                                    <h2 className="text-2xl font-black text-gray-900 uppercase italic tracking-tighter">Control Operativo</h2>
+                                    <h2 className="text-xl lg:text-2xl font-black text-gray-900 uppercase italic tracking-tighter">Control Operativo</h2>
                                     <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest mt-1">Historial cronológico de transaciones corporativas.</p>
                                 </div>
-                                <div className="relative">
+                                <div className="relative w-full md:w-auto">
                                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                                    <input type="text" placeholder="Filtrar por fecha o monto..." className="bg-white border border-gray-200 rounded-2xl py-4 pl-12 pr-8 text-xs font-bold focus:ring-1 focus:ring-gray-900 w-80 shadow-sm" />
+                                    <input type="text" placeholder="Filtrar por fecha..." className="w-full md:w-80 bg-white border border-gray-200 rounded-2xl py-4 pl-12 pr-8 text-xs font-bold focus:ring-1 focus:ring-gray-900 shadow-sm" />
                                 </div>
                             </div>
-                            <table className="w-full text-left">
-                                <thead className="text-[11px] font-black text-gray-500 uppercase tracking-widest bg-gray-50/50">
-                                    <tr>
-                                        <th className="px-12 py-8">Periodo</th>
-                                        <th className="py-8">Facturación Real</th>
-                                        <th className="py-8">Gastos Directos</th>
-                                        <th className="py-8">Costos Fijos</th>
-                                        <th className="px-12 py-8 text-right">Balance Neto</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-gray-50">
-                                    {records.map((r, i) => {
-                                        const bal = Number(r.sales) - Number(r.expenses) - Number(r.fixed_costs);
-                                        return (
-                                            <tr key={i} className="hover:bg-gray-50/40 transition-colors duration-200">
-                                                <td className="px-12 py-8 font-black text-xs uppercase tracking-tighter text-gray-500">{r.record_date}</td>
-                                                <td className="py-8 text-gray-900 font-extrabold text-base">${Number(r.sales).toLocaleString()}</td>
-                                                <td className="py-8 text-gray-600 font-bold italic">-${Number(r.expenses).toLocaleString()}</td>
-                                                <td className="py-8 text-gray-400 font-bold">-${Number(r.fixed_costs).toLocaleString()}</td>
-                                                <td className={`px-12 py-8 text-right font-black text-base ${bal >= 0 ? 'text-gray-900' : 'text-red-500'}`}>
-                                                    ${bal.toLocaleString()}
-                                                </td>
-                                            </tr>
-                                        )
-                                    })}
-                                </tbody>
-                            </table>
+
+                            {/* Mobile View: Cards */}
+                            <div className="md:hidden divide-y divide-gray-100">
+                                {records.map((r, i) => {
+                                    const bal = Number(r.sales) - Number(r.expenses) - Number(r.fixed_costs);
+                                    return (
+                                        <div key={i} className="p-6 space-y-4">
+                                            <div className="flex justify-between items-center">
+                                                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{r.record_date}</span>
+                                                <span className={`text-sm font-black ${bal >= 0 ? 'text-gray-900' : 'text-red-500'}`}>
+                                                    Balance: ${bal.toLocaleString()}
+                                                </span>
+                                            </div>
+                                            <div className="grid grid-cols-3 gap-2">
+                                                <div className="p-3 bg-gray-50 rounded-xl">
+                                                    <span className="text-[8px] font-bold text-gray-400 uppercase block mb-1">Ventas</span>
+                                                    <span className="text-xs font-black text-gray-900">${Number(r.sales).toLocaleString()}</span>
+                                                </div>
+                                                <div className="p-3 bg-gray-50 rounded-xl">
+                                                    <span className="text-[8px] font-bold text-gray-400 uppercase block mb-1">Gastos</span>
+                                                    <span className="text-xs font-bold text-gray-600">-${Number(r.expenses).toLocaleString()}</span>
+                                                </div>
+                                                <div className="p-3 bg-gray-50 rounded-xl">
+                                                    <span className="text-[8px] font-bold text-gray-400 uppercase block mb-1">Fijos</span>
+                                                    <span className="text-xs font-bold text-gray-400">-${Number(r.fixed_costs).toLocaleString()}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )
+                                })}
+                            </div>
+
+                            {/* Desktop View: Table */}
+                            <div className="hidden md:block">
+                                <table className="w-full text-left">
+                                    <thead className="text-[11px] font-black text-gray-500 uppercase tracking-widest bg-gray-50/50">
+                                        <tr>
+                                            <th className="px-12 py-8">Periodo</th>
+                                            <th className="py-8">Facturación Real</th>
+                                            <th className="py-8">Gastos Directos</th>
+                                            <th className="py-8">Costos Fijos</th>
+                                            <th className="px-12 py-8 text-right">Balance Neto</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-gray-50">
+                                        {records.map((r, i) => {
+                                            const bal = Number(r.sales) - Number(r.expenses) - Number(r.fixed_costs);
+                                            return (
+                                                <tr key={i} className="hover:bg-gray-50/40 transition-colors duration-200">
+                                                    <td className="px-12 py-8 font-black text-xs uppercase tracking-tighter text-gray-500">{r.record_date}</td>
+                                                    <td className="py-8 text-gray-900 font-extrabold text-base">${Number(r.sales).toLocaleString()}</td>
+                                                    <td className="py-8 text-gray-600 font-bold italic">-${Number(r.expenses).toLocaleString()}</td>
+                                                    <td className="py-8 text-gray-400 font-bold">-${Number(r.fixed_costs).toLocaleString()}</td>
+                                                    <td className={`px-12 py-8 text-right font-black text-base ${bal >= 0 ? 'text-gray-900' : 'text-red-500'}`}>
+                                                        ${bal.toLocaleString()}
+                                                    </td>
+                                                </tr>
+                                            )
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     )}
 
