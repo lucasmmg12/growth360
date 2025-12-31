@@ -227,7 +227,7 @@ const ClientView = ({ session, profile, isDemo, onLogout }) => {
             {/* Main Corporate Workspace - Gray Background */}
             <main className="flex-grow overflow-y-auto custom-scrollbar bg-transparent">
 
-                <header className="sticky top-0 z-10 bg-gray-100/80 backdrop-blur-md px-12 py-8 flex justify-between items-center border-b border-gray-200">
+                <header className="sticky top-0 z-10 bg-white/20 backdrop-blur-xl px-12 py-8 flex justify-between items-center border-b border-gray-200/50">
                     <div>
                         <h1 className="text-2xl font-black text-gray-900 tracking-tight capitalize">
                             {activeTab === 'resumen' && 'Resumen Ejecutivo'}

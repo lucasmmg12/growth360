@@ -47,7 +47,7 @@ const Dashboard = ({ session, isDemo, onLogout }) => {
     };
 
     return (
-        <div className="min-h-screen bg-grow-950 text-white font-montserrat">
+        <div className="min-h-screen bg-transparent text-gray-900 font-montserrat">
             {profile?.role === 'admin' ? (
                 <AdminView session={session} isDemo={isDemo} onLogout={handleSignOut} />
             ) : (

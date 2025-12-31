@@ -30,8 +30,8 @@ function App() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-grow-950 flex items-center justify-center">
-                <div className="w-12 h-12 border-4 border-grow-green border-t-transparent rounded-full animate-spin"></div>
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="w-12 h-12 border-4 border-gray-900 border-t-transparent rounded-full animate-spin"></div>
             </div>
         );
     }
@@ -39,19 +39,22 @@ function App() {
     const activeSession = session || demoUser;
 
     return (
-        <Router>
-            <Routes>
-                <Route
-                    path="/login"
-                    element={!activeSession ? <Login startDemo={startDemo} /> : <Navigate to="/dashboard" />}
-                />
-                <Route
-                    path="/dashboard/*"
-                    element={activeSession ? <Dashboard session={activeSession} isDemo={!!demoUser} onLogout={() => setDemoUser(null)} /> : <Navigate to="/login" />}
-                />
-                <Route path="*" element={<Navigate to={activeSession ? "/dashboard" : "/login"} />} />
-            </Routes>
-        </Router>
+        <>
+            <div className="app-bg-overlay"></div>
+            <Router>
+                <Routes>
+                    <Route
+                        path="/login"
+                        element={!activeSession ? <Login startDemo={startDemo} /> : <Navigate to="/dashboard" />}
+                    />
+                    <Route
+                        path="/dashboard/*"
+                        element={activeSession ? <Dashboard session={activeSession} isDemo={!!demoUser} onLogout={() => setDemoUser(null)} /> : <Navigate to="/login" />}
+                    />
+                    <Route path="*" element={<Navigate to={activeSession ? "/dashboard" : "/login"} />} />
+                </Routes>
+            </Router>
+        </>
     );
 }
 
