@@ -69,7 +69,7 @@ const Login = ({ startDemo }) => {
                             </div>
                             <h1 className="text-6xl xl:text-8xl font-black tracking-tighter text-gray-900 leading-[0.95] italic">
                                 Operación <br />
-                                <span className="text-gray-300 not-italic font-light tracking-normal">Inteligente.</span>
+                                <span className="text-gray-500 not-italic font-light tracking-normal">Inteligente.</span>
                             </h1>
                             <p className="text-gray-500 text-xl max-w-lg leading-relaxed font-medium">
                                 Plataforma de alta dirección para el monitoreo de métricas críticas y market intelligence en tiempo real.
