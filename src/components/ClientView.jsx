@@ -39,6 +39,7 @@ import {
 } from 'chart.js';
 import { Line, Bar, Doughnut } from 'react-chartjs-2';
 import * as SCRAPER from '../utils/scraper';
+import MethodologyTab from './MethodologyTab';
 
 ChartJS.register(
     CategoryScale,
@@ -227,6 +228,7 @@ const ClientView = ({ session, profile, isDemo, onLogout }) => {
                         { id: 'resumen', label: 'Dashboard General', icon: <LayoutDashboard size={18} /> },
                         { id: 'registros', label: 'Registros Diarios', icon: <FileText size={18} /> },
                         { id: 'competencia', label: 'Market Intelligence', icon: <Target size={18} /> },
+                        { id: 'metodologia', label: 'Metodología 360', icon: <Zap size={18} /> },
                         { id: 'perfil', label: 'Configuración', icon: <Settings size={18} /> },
                     ].map(tab => (
                         <button
@@ -258,6 +260,7 @@ const ClientView = ({ session, profile, isDemo, onLogout }) => {
                             {activeTab === 'resumen' && 'Resumen Ejecutivo'}
                             {activeTab === 'registros' && 'Control Operativo'}
                             {activeTab === 'competencia' && 'Market Intelligence'}
+                            {activeTab === 'metodologia' && 'Metodología & Scale'}
                             {activeTab === 'perfil' && 'Configuración de Entidad'}
                         </h1>
                         <p className="text-gray-500 text-[10px] font-bold mt-1 uppercase tracking-[0.2em]">
@@ -463,6 +466,10 @@ const ClientView = ({ session, profile, isDemo, onLogout }) => {
                                 </tbody>
                             </table>
                         </div>
+                    )}
+
+                    {activeTab === 'metodologia' && (
+                        <MethodologyTab />
                     )}
 
                     {activeTab === 'perfil' && (
