@@ -53,7 +53,7 @@ const Login = ({ startDemo }) => {
     };
 
     return (
-        <div className="min-h-screen bg-gray-100 flex flex-col font-montserrat text-gray-900 overflow-hidden relative">
+        <div className="min-h-screen bg-transparent flex flex-col font-montserrat text-gray-900 overflow-hidden relative">
 
             {/* Structural background elements */}
             <div className="absolute top-0 right-0 w-[60%] h-full bg-white skew-x-[-12deg] translate-x-[20%] z-0 border-l border-gray-200 shadow-[0_0_80px_rgba(0,0,0,0.02)]"></div>

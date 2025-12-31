@@ -186,7 +186,7 @@ const ClientView = ({ session, profile, isDemo, onLogout }) => {
     if (loading && !isDemo) return <div className="h-screen flex items-center justify-center bg-gray-100"><div className="w-8 h-8 border-2 border-gray-900 border-t-transparent rounded-full animate-spin"></div></div>;
 
     return (
-        <div className="flex h-screen bg-gray-100 text-gray-950 font-montserrat overflow-hidden">
+        <div className="flex h-screen bg-transparent text-gray-950 font-montserrat overflow-hidden">
 
             {/* Sidebar - White to pop against gray bg */}
             <aside className="w-72 bg-white border-r border-gray-200 flex flex-col p-8 space-y-10 z-20 shadow-xl">
@@ -225,7 +225,7 @@ const ClientView = ({ session, profile, isDemo, onLogout }) => {
             </aside>
 
             {/* Main Corporate Workspace - Gray Background */}
-            <main className="flex-grow overflow-y-auto custom-scrollbar bg-gray-100/50">
+            <main className="flex-grow overflow-y-auto custom-scrollbar bg-transparent">
 
                 <header className="sticky top-0 z-10 bg-gray-100/80 backdrop-blur-md px-12 py-8 flex justify-between items-center border-b border-gray-200">
                     <div>
@@ -458,7 +458,7 @@ const ClientView = ({ session, profile, isDemo, onLogout }) => {
                                         {/* Nombre y Apellido */}
                                         <div className="space-y-4">
                                             <label className="text-[10px] font-black text-gray-900 uppercase tracking-[0.2em] ml-2">Nombre y Apellido</label>
-                                            <input type="text" className="w-full bg-gray-50 border-gray-100 rounded-[1.5rem] py-6 px-8 text-sm font-black focus:bg-white focus:ring-2 focus:ring-gray-900/5 transition-all outline-none"
+                                            <input type="text" className="w-full bg-gray-100 border border-gray-200 rounded-[1.5rem] py-6 px-8 text-sm font-black focus:bg-white focus:ring-2 focus:ring-gray-900/5 transition-all outline-none shadow-sm"
                                                 value={businessData?.full_name || ''}
                                                 onChange={(e) => setBusinessData({ ...businessData, full_name: e.target.value })}
                                                 placeholder="Ej: Juan Pérez"
@@ -471,7 +471,7 @@ const ClientView = ({ session, profile, isDemo, onLogout }) => {
                                         {/* Nombre Fantasía */}
                                         <div className="space-y-4">
                                             <label className="text-[10px] font-black text-gray-900 uppercase tracking-[0.2em] ml-2">Nombre Fantasía del Negocio</label>
-                                            <input type="text" className="w-full bg-gray-50 border-gray-100 rounded-[1.5rem] py-6 px-8 text-sm font-black focus:bg-white focus:ring-2 focus:ring-gray-900/5 transition-all outline-none"
+                                            <input type="text" className="w-full bg-gray-100 border border-gray-200 rounded-[1.5rem] py-6 px-8 text-sm font-black focus:bg-white focus:ring-2 focus:ring-gray-900/5 transition-all outline-none shadow-sm"
                                                 value={businessData?.fantasy_name || ''}
                                                 onChange={(e) => setBusinessData({ ...businessData, fantasy_name: e.target.value })}
                                                 placeholder="Ej: Vyper Suplementos"
@@ -486,7 +486,7 @@ const ClientView = ({ session, profile, isDemo, onLogout }) => {
                                         {/* Instagram */}
                                         <div className="space-y-4">
                                             <label className="text-[10px] font-black text-gray-900 uppercase tracking-[0.2em] ml-2">Perfil de Instagram (URL)</label>
-                                            <input type="text" className="w-full bg-gray-50 border-gray-100 rounded-[1.5rem] py-6 px-8 text-sm font-black focus:bg-white focus:ring-2 focus:ring-gray-900/5 transition-all outline-none"
+                                            <input type="text" className="w-full bg-gray-100 border border-gray-200 rounded-[1.5rem] py-6 px-8 text-sm font-black focus:bg-white focus:ring-2 focus:ring-gray-900/5 transition-all outline-none shadow-sm"
                                                 value={businessData?.instagram_url || ''}
                                                 onChange={(e) => setBusinessData({ ...businessData, instagram_url: e.target.value })}
                                                 placeholder="https://instagram.com/tu.negocio"
@@ -500,7 +500,7 @@ const ClientView = ({ session, profile, isDemo, onLogout }) => {
                                         <div className="space-y-4">
                                             <label className="text-[10px] font-black text-gray-900 uppercase tracking-[0.2em] ml-2">Rubro / Sector</label>
                                             <select
-                                                className="w-full bg-gray-50 border-gray-100 rounded-[1.5rem] py-6 px-10 text-sm font-black focus:bg-white focus:ring-2 focus:ring-gray-900/5 transition-all outline-none appearance-none"
+                                                className="w-full bg-gray-100 border border-gray-200 rounded-[1.5rem] py-6 px-10 text-sm font-black focus:bg-white focus:ring-2 focus:ring-gray-900/5 transition-all outline-none appearance-none shadow-sm"
                                                 value={businessData?.rubro || ''}
                                                 onChange={(e) => setBusinessData({ ...businessData, rubro: e.target.value })}
                                             >
@@ -532,7 +532,7 @@ const ClientView = ({ session, profile, isDemo, onLogout }) => {
                                                 <MapIcon size={12} /> Buscar en Google Maps
                                             </a>
                                         </div>
-                                        <input type="text" className="w-full bg-gray-50 border-gray-100 rounded-[1.5rem] py-6 px-8 text-sm font-black focus:bg-white focus:ring-2 focus:ring-gray-900/5 transition-all outline-none"
+                                        <input type="text" className="w-full bg-gray-100 border border-gray-200 rounded-[1.5rem] py-6 px-8 text-sm font-black focus:bg-white focus:ring-2 focus:ring-gray-900/5 transition-all outline-none shadow-sm"
                                             value={businessData?.google_maps_url || ''}
                                             onChange={(e) => setBusinessData({ ...businessData, google_maps_url: e.target.value })}
                                             placeholder="Pegue aquí el enlace compartido de Google Maps"
@@ -546,7 +546,7 @@ const ClientView = ({ session, profile, isDemo, onLogout }) => {
                                     <div className="space-y-4">
                                         <label className="text-[10px] font-black text-gray-900 uppercase tracking-[0.2em] ml-2">Tipificación de Cliente Core</label>
                                         <select
-                                            className="w-full bg-gray-50 border-gray-100 rounded-[1.5rem] py-6 px-10 text-sm font-black focus:bg-white focus:ring-2 focus:ring-gray-900/5 transition-all outline-none appearance-none"
+                                            className="w-full bg-gray-100 border border-gray-200 rounded-[1.5rem] py-6 px-10 text-sm font-black focus:bg-white focus:ring-2 focus:ring-gray-900/5 transition-all outline-none appearance-none shadow-sm"
                                             value={businessData?.client_type || 'minorista'}
                                             onChange={(e) => setBusinessData({ ...businessData, client_type: e.target.value })}
                                         >

@@ -39,7 +39,7 @@ const AdminView = ({ session, isDemo, onLogout }) => {
     };
 
     return (
-        <div className="min-h-screen bg-gray-100 flex font-montserrat text-gray-900 overflow-hidden">
+        <div className="min-h-screen bg-transparent flex font-montserrat text-gray-900 overflow-hidden">
 
             {/* Sidebar Admin - White */}
             <aside className="w-80 bg-white border-r border-gray-200 flex flex-col p-10 space-y-12 shadow-xl z-20">
@@ -78,7 +78,7 @@ const AdminView = ({ session, isDemo, onLogout }) => {
             </aside>
 
             {/* Main Admin Content - Gray Bg */}
-            <main className="flex-grow p-16 overflow-y-auto custom-scrollbar bg-gray-100/30">
+            <main className="flex-grow p-16 overflow-y-auto custom-scrollbar bg-transparent">
                 <div className="max-w-7xl mx-auto space-y-16">
 
                     <header className="flex justify-between items-end border-b-2 border-gray-200 pb-12">
