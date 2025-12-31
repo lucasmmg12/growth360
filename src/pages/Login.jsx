@@ -4,28 +4,7 @@ import { Mail, Lock, ArrowRight, Zap, Target, Bot, BarChart3, Globe, ChevronRigh
 import { supabase } from '../lib/supabase';
 import Footer from '../components/Footer';
 
-const services = [
-    {
-        title: "Módulos de Automatización",
-        desc: "Optimización de procesos operativos y reducción de tiempos de gestión.",
-        icon: <Zap className="w-5 h-5 text-gray-900" />
-    },
-    {
-        title: "Inteligencia Institucional",
-        desc: "Sistemas de respuesta contextual basados en documentación propia.",
-        icon: <Bot className="w-5 h-5 text-gray-900" />
-    },
-    {
-        title: "Ecosistemas Digitales",
-        desc: "Desarrollo de portales y aplicaciones personalizadas.",
-        icon: <Globe className="w-5 h-5 text-gray-900" />
-    },
-    {
-        title: "Comunicación de IA",
-        desc: "Canales de atención automatizados con lenguaje natural.",
-        icon: <Mail className="w-5 h-5 text-gray-900" />
-    }
-];
+
 
 const Login = ({ startDemo }) => {
     const [email, setEmail] = useState('');
@@ -76,17 +55,7 @@ const Login = ({ startDemo }) => {
                             </p>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            {services.map((s, i) => (
-                                <div key={i} className="group p-8 bg-white/50 backdrop-blur-sm border border-white rounded-[2.5rem] transition-all duration-500 hover:bg-white hover:shadow-2xl hover:shadow-gray-900/5">
-                                    <div className="w-12 h-12 bg-white rounded-[1.2rem] flex items-center justify-center mb-6 shadow-sm group-hover:bg-gray-900 group-hover:text-white transition-all duration-300">
-                                        {s.icon}
-                                    </div>
-                                    <h3 className="font-extrabold text-gray-900 mb-3 tracking-tight">{s.title}</h3>
-                                    <p className="text-sm text-gray-400 leading-relaxed font-bold uppercase tracking-tighter italic">{s.desc}</p>
-                                </div>
-                            ))}
-                        </div>
+
 
                         <div className="pt-6">
                             <a href="https://www.growlabs.lat" target="_blank" className="text-[12px] font-black text-gray-900 flex items-center gap-3 group tracking-widest uppercase">
