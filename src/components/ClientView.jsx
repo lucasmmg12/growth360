@@ -59,6 +59,7 @@ const ClientView = ({ session, profile, isDemo, onLogout }) => {
     const [records, setRecords] = useState([]);
     const [competitors, setCompetitors] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [showSidebar, setShowSidebar] = useState(false);
 
     const [modalMode, setModalMode] = useState(null); // 'venta' or 'gasto'
     const [newRecord, setNewRecord] = useState({
@@ -214,9 +215,31 @@ const ClientView = ({ session, profile, isDemo, onLogout }) => {
     if (loading && !isDemo) return <div className="h-screen flex items-center justify-center bg-gray-100"><div className="w-8 h-8 border-2 border-gray-900 border-t-transparent rounded-full animate-spin"></div></div>;
 
     return (
-        <div className="flex h-screen bg-transparent text-gray-950 font-montserrat overflow-hidden">
+        <div className="flex flex-col lg:flex-row h-screen bg-transparent text-gray-950 font-montserrat overflow-hidden relative">
+            {/* Mobile Header */}
+            <header className="lg:hidden flex items-center justify-between px-6 py-5 bg-white border-b border-gray-100 z-30">
+                <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-gray-900 rounded-lg flex items-center justify-center text-white font-black text-xs">G</div>
+                    <span className="font-extrabold tracking-tighter text-base uppercase italic text-gray-900">Growth<span className="text-gray-400">360</span></span>
+                </div>
+                <button
+                    onClick={() => setShowSidebar(!showSidebar)}
+                    className="p-2 text-gray-900"
+                >
+                    {showSidebar ? <XCircle size={24} /> : <Navigation className="rotate-90" size={24} />}
+                </button>
+            </header>
+
+            {/* Sidebar Overlay for Mobile */}
+            {showSidebar && (
+                <div
+                    className="lg:hidden fixed inset-0 bg-gray-900/40 backdrop-blur-sm z-40 transition-opacity"
+                    onClick={() => setShowSidebar(false)}
+                />
+            )}
+
             {/* Sidebar */}
-            <aside className="w-72 bg-white border-r border-gray-200 flex flex-col p-8 space-y-10 z-20 shadow-xl">
+            <aside className={`fixed inset-y-0 left-0 w-72 bg-white border-r border-gray-200 flex flex-col p-8 space-y-10 z-50 shadow-2xl transition-transform duration-300 transform lg:relative lg:translate-x-0 lg:shadow-xl lg:z-20 ${showSidebar ? 'translate-x-0' : '-translate-x-full'}`}>
                 <div className="flex items-center gap-3 px-2">
                     <div className="w-9 h-9 bg-gray-900 rounded-lg flex items-center justify-center text-white font-black text-sm">G</div>
                     <span className="font-extrabold tracking-tighter text-lg uppercase italic text-gray-900">Growth<span className="text-gray-400">360</span></span>
@@ -233,7 +256,10 @@ const ClientView = ({ session, profile, isDemo, onLogout }) => {
                     ].map(tab => (
                         <button
                             key={tab.id}
-                            onClick={() => setActiveTab(tab.id)}
+                            onClick={() => {
+                                setActiveTab(tab.id);
+                                setShowSidebar(false);
+                            }}
                             className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-semibold transition-all duration-300 ${activeTab === tab.id ? 'bg-gray-900 text-white shadow-lg shadow-gray-900/20' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
                                 }`}
                         >
@@ -254,7 +280,7 @@ const ClientView = ({ session, profile, isDemo, onLogout }) => {
 
             {/* Main Corporate Workspace */}
             <main className="flex-grow overflow-y-auto custom-scrollbar bg-transparent">
-                <header className="sticky top-0 z-10 bg-white/20 backdrop-blur-xl px-12 py-8 flex justify-between items-center border-b border-gray-200/50">
+                <header className="sticky top-0 z-10 bg-white/40 backdrop-blur-xl px-6 py-6 lg:px-12 lg:py-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 border-b border-gray-200/50">
                     <div>
                         <h1 className="text-2xl font-black text-gray-900 tracking-tight capitalize">
                             {activeTab === 'resumen' && 'Resumen Ejecutivo'}

@@ -9,6 +9,7 @@ const AdminView = ({ session, isDemo, onLogout }) => {
     const [newPassword, setNewPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const [activeTab, setActiveTab] = useState('directorio');
+    const [showSidebar, setShowSidebar] = useState(false);
 
     useEffect(() => {
         if (isDemo) {
@@ -41,10 +42,32 @@ const AdminView = ({ session, isDemo, onLogout }) => {
     };
 
     return (
-        <div className="min-h-screen bg-transparent flex font-montserrat text-gray-900 overflow-hidden">
+        <div className="min-h-screen bg-transparent flex flex-col lg:flex-row font-montserrat text-gray-900 overflow-hidden relative">
+
+            {/* Mobile Header */}
+            <header className="lg:hidden flex items-center justify-between px-6 py-5 bg-white border-b border-gray-100 z-30">
+                <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 bg-gray-900 rounded-lg flex items-center justify-center text-white font-black text-xs">A</div>
+                    <span className="font-extrabold tracking-tighter text-base uppercase italic text-gray-900">Growth<span className="text-gray-300">Admin</span></span>
+                </div>
+                <button
+                    onClick={() => setShowSidebar(!showSidebar)}
+                    className="p-2 text-gray-900"
+                >
+                    {showSidebar ? <XCircle size={24} /> : <Zap className="rotate-90" size={24} />}
+                </button>
+            </header>
+
+            {/* Sidebar Overlay for Mobile */}
+            {showSidebar && (
+                <div
+                    className="lg:hidden fixed inset-0 bg-gray-900/40 backdrop-blur-sm z-40 transition-opacity"
+                    onClick={() => setShowSidebar(false)}
+                />
+            )}
 
             {/* Sidebar Admin - White */}
-            <aside className="w-80 bg-white border-r border-gray-200 flex flex-col p-10 space-y-12 shadow-xl z-20">
+            <aside className={`fixed inset-y-0 left-0 w-80 bg-white border-r border-gray-200 flex flex-col p-10 space-y-12 shadow-2xl transition-transform duration-300 transform lg:relative lg:translate-x-0 lg:shadow-xl lg:z-20 ${showSidebar ? 'translate-x-0' : '-translate-x-full'}`}>
                 <div className="flex items-center gap-3">
                     <div className="w-11 h-11 bg-gray-900 rounded-xl flex items-center justify-center text-white font-black text-sm shadow-xl">A</div>
                     <div>
@@ -61,7 +84,10 @@ const AdminView = ({ session, isDemo, onLogout }) => {
                     ].map(tab => (
                         <button
                             key={tab.id}
-                            onClick={() => setActiveTab(tab.id)}
+                            onClick={() => {
+                                setActiveTab(tab.id);
+                                setShowSidebar(false);
+                            }}
                             className={`w-full flex items-center gap-3 px-6 py-4 rounded-2xl text-xs font-black transition-all duration-300 ${activeTab === tab.id ? 'bg-gray-900 text-white shadow-xl shadow-gray-900/20' : 'text-gray-400 hover:text-gray-900 hover:bg-gray-50'
                                 }`}
                         >
@@ -83,18 +109,18 @@ const AdminView = ({ session, isDemo, onLogout }) => {
             </aside>
 
             {/* Main Admin Content - Gray Bg */}
-            <main className="flex-grow p-16 overflow-y-auto custom-scrollbar bg-transparent">
-                <div className="max-w-7xl mx-auto space-y-16">
+            <main className="flex-grow p-6 lg:p-16 overflow-y-auto custom-scrollbar bg-transparent">
+                <div className="max-w-7xl mx-auto space-y-10 lg:space-y-16">
                     {activeTab === 'directorio' ? (
                         <>
-                            <header className="flex justify-between items-end border-b-2 border-gray-200 pb-12">
+                            <header className="flex flex-col md:flex-row justify-between items-start md:items-end border-b-2 border-gray-200 pb-10 gap-6">
                                 <div>
-                                    <h1 className="text-5xl font-black text-gray-900 tracking-tighter capitalize underline decoration-gray-950/5 underline-offset-8">Directorio Corporativo</h1>
-                                    <p className="text-gray-400 font-bold mt-4 uppercase tracking-[0.3em] text-[10px]">Gestión avanzada de entidades del ecosistema 360</p>
+                                    <h1 className="text-3xl lg:text-5xl font-black text-gray-900 tracking-tighter capitalize underline decoration-gray-950/5 underline-offset-8">Directorio Corporativo</h1>
+                                    <p className="text-gray-400 font-bold mt-4 uppercase tracking-[0.3em] text-[9px] lg:text-[10px]">Gestión avanzada de entidades del ecosistema 360</p>
                                 </div>
                                 <div className="flex items-baseline gap-4 bg-white p-6 rounded-[2rem] shadow-sm border border-gray-200">
-                                    <span className="text-6xl font-black text-gray-900 tracking-tighter">{clients.length}</span>
-                                    <span className="text-[11px] font-black text-gray-400 uppercase tracking-widest translate-y-[-10px]">Entidades<br />Activas</span>
+                                    <span className="text-4xl lg:text-6xl font-black text-gray-900 tracking-tighter">{clients.length}</span>
+                                    <span className="text-[10px] lg:text-[11px] font-black text-gray-400 uppercase tracking-widest translate-y-[-5px] lg:translate-y-[-10px]">Entidades<br />Activas</span>
                                 </div>
                             </header>
 
